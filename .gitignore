@@ -4,10 +4,16 @@ __pycache__/
 *$py.class
 
 # Virtual environment
+.venv/
 venv/
 backend/venv/
+
+# Environment variables
 .env
 backend/.env
+.env.local
+frontend/.env
+frontend/.env.local
 
 # Django
 *.log
@@ -21,9 +27,6 @@ postgres_data/
 node_modules/
 dist/
 build/
-.env.local
-frontend/.env
-frontend/.env.local
 
 # IDEs
 .vscode/

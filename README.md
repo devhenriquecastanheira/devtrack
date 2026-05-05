@@ -26,24 +26,26 @@ Na raiz do projeto, rode:
 docker compose up -d
 ```
 
-### 2. Configurar o backend
+### 2. Criar e ativar o ambiente virtual
 
-Entre na pasta do backend:
-
-```bash
-cd backend
-```
-
-Crie o ambiente virtual:
+Na raiz do projeto, crie o ambiente virtual:
 
 ```bash
-python -m venv venv
+python -m venv .venv
 ```
 
 Ative o ambiente virtual no Windows PowerShell:
 
 ```bash
-.\venv\Scripts\Activate.ps1
+.\.venv\Scripts\Activate.ps1
+```
+
+### 3. Configurar o backend
+
+Entre na pasta do backend:
+
+```bash
+cd backend
 ```
 
 Instale as dependências:
@@ -60,7 +62,7 @@ Rode as migrations:
 python manage.py migrate
 ```
 
-### 3. Rodar o backend
+### 4. Rodar o backend
 
 Ainda dentro da pasta `backend`, rode:
 
