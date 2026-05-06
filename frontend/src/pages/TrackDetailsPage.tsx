@@ -8,6 +8,7 @@ import {
   updateTopic,
 } from '../api/topics';
 import type { Topic, Track, TrackStatus } from '../types/track';
+import { ConfirmModal } from '../components/ConfirmModal';
 
 const statusLabels: Record<TrackStatus, string> = {
   not_started: 'Não iniciada',
@@ -534,59 +535,15 @@ export function TrackDetailsPage() {
       )}
 
       {topicToDelete && (
-        <>
-          <div className="modal fade show d-block" tabIndex={-1} role="dialog">
-            <div className="modal-dialog modal-dialog-centered" role="document">
-              <div className="modal-content border-0 shadow">
-                <div className="modal-header">
-                  <h5 className="modal-title">Excluir tópico</h5>
-                  <button
-                    className="btn-close"
-                    type="button"
-                    aria-label="Fechar"
-                    disabled={deletingTopicId === topicToDelete.id}
-                    onClick={() => setTopicToDelete(null)}
-                  />
-                </div>
-
-                <div className="modal-body">
-                  <p className="mb-1">
-                    Tem certeza que deseja excluir o tópico{' '}
-                    <strong>{topicToDelete.title}</strong>?
-                  </p>
-
-                  <p className="text-muted mb-0">
-                    Essa ação não poderá ser desfeita.
-                  </p>
-                </div>
-
-                <div className="modal-footer">
-                  <button
-                    className="btn btn-outline-secondary"
-                    type="button"
-                    disabled={deletingTopicId === topicToDelete.id}
-                    onClick={() => setTopicToDelete(null)}
-                  >
-                    Cancelar
-                  </button>
-
-                  <button
-                    className="btn btn-danger"
-                    type="button"
-                    disabled={deletingTopicId === topicToDelete.id}
-                    onClick={handleConfirmDeleteTopic}
-                  >
-                    {deletingTopicId === topicToDelete.id
-                      ? 'Excluindo...'
-                      : 'Excluir tópico'}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="modal-backdrop fade show" />
-        </>
+        <ConfirmModal
+          title="Excluir tópico"
+          message={`Tem certeza que deseja excluir o tópico "${topicToDelete.title}"?`}
+          description="Essa ação não poderá ser desfeita."
+          confirmLabel="Excluir tópico"
+          isLoading={deletingTopicId === topicToDelete.id}
+          onCancel={() => setTopicToDelete(null)}
+          onConfirm={handleConfirmDeleteTopic}
+        />
       )}
     </div>
   );

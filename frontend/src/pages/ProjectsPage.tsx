@@ -7,6 +7,9 @@ import {
   updateProject,
 } from '../api/projects';
 import type { Project, ProjectStatus } from '../types/project';
+import { ConfirmModal } from '../components/ConfirmModal';
+import { PageHeader } from '../components/PageHeader';
+import { formatDate } from '../utils/formatDate';
 
 const statusLabels: Record<ProjectStatus, string> = {
   planning: 'Planejamento',
@@ -184,22 +187,19 @@ export function ProjectsPage() {
 
   return (
     <div>
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <div>
-          <h1 className="mb-1">Projetos</h1>
-          <p className="text-muted mb-0">
-            Gerencie os projetos do seu portfólio.
-          </p>
-        </div>
-
-        <button
-          className="btn btn-primary"
-          type="button"
-          onClick={handleCreateClick}
-        >
-          {isFormVisible && !editingProjectId ? 'Fechar' : 'Novo projeto'}
-        </button>
-      </div>
+      <PageHeader
+        title="Projetos"
+        description="Gerencie os projetos do seu portfólio."
+        action={
+          <button
+            className="btn btn-primary"
+            type="button"
+            onClick={handleCreateClick}
+          >
+            {isFormVisible && !editingProjectId ? 'Fechar' : 'Novo projeto'}
+          </button>
+        }
+      />
 
       {errorMessage && (
         <div className="alert alert-danger" role="alert">
@@ -417,9 +417,7 @@ export function ProjectsPage() {
 
                 <div className="card-footer text-muted small">
                   Criado em{' '}
-                  {new Intl.DateTimeFormat('pt-BR').format(
-                    new Date(project.created_at),
-                  )}
+                  {formatDate(project.created_at)}
                 </div>
               </div>
             </div>
@@ -428,59 +426,15 @@ export function ProjectsPage() {
       )}
 
       {projectToDelete && (
-        <>
-          <div className="modal fade show d-block" tabIndex={-1} role="dialog">
-            <div className="modal-dialog modal-dialog-centered" role="document">
-              <div className="modal-content border-0 shadow">
-                <div className="modal-header">
-                  <h5 className="modal-title">Excluir projeto</h5>
-                  <button
-                    className="btn-close"
-                    type="button"
-                    aria-label="Fechar"
-                    disabled={deletingProjectId === projectToDelete.id}
-                    onClick={() => setProjectToDelete(null)}
-                  />
-                </div>
-
-                <div className="modal-body">
-                  <p className="mb-1">
-                    Tem certeza que deseja excluir o projeto{' '}
-                    <strong>{projectToDelete.title}</strong>?
-                  </p>
-
-                  <p className="text-muted mb-0">
-                    Essa ação não poderá ser desfeita.
-                  </p>
-                </div>
-
-                <div className="modal-footer">
-                  <button
-                    className="btn btn-outline-secondary"
-                    type="button"
-                    disabled={deletingProjectId === projectToDelete.id}
-                    onClick={() => setProjectToDelete(null)}
-                  >
-                    Cancelar
-                  </button>
-
-                  <button
-                    className="btn btn-danger"
-                    type="button"
-                    disabled={deletingProjectId === projectToDelete.id}
-                    onClick={handleConfirmDelete}
-                  >
-                    {deletingProjectId === projectToDelete.id
-                      ? 'Excluindo...'
-                      : 'Excluir projeto'}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="modal-backdrop fade show" />
-        </>
+        <ConfirmModal
+          title="Excluir projeto"
+          message={`Tem certeza que deseja excluir o projeto "${projectToDelete.title}"?`}
+          description="Essa ação não poderá ser desfeita."
+          confirmLabel="Excluir projeto"
+          isLoading={deletingProjectId === projectToDelete.id}
+          onCancel={() => setProjectToDelete(null)}
+          onConfirm={handleConfirmDelete}
+        />
       )}
     </div>
   );

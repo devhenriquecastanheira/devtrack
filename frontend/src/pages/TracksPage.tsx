@@ -8,6 +8,9 @@ import {
   updateTrack,
 } from '../api/tracks';
 import type { Track, TrackStatus } from '../types/track';
+import { ConfirmModal } from '../components/ConfirmModal';
+import { PageHeader } from '../components/PageHeader';
+import { formatDate } from '../utils/formatDate';
 
 const statusLabels: Record<TrackStatus, string> = {
   not_started: 'Não iniciada',
@@ -172,22 +175,19 @@ async function handleConfirmDelete() {
 
   return (
     <div>
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <div>
-          <h1 className="mb-1">Trilhas</h1>
-          <p className="text-muted mb-0">
-            Acompanhe suas trilhas de estudo e seus tópicos.
-          </p>
-        </div>
-
-        <button
-          className="btn btn-primary"
-          type="button"
-          onClick={handleCreateClick}
-        >
-          {isFormVisible && !editingTrackId ? 'Fechar' : 'Nova trilha'}
-        </button>
-      </div>
+      <PageHeader
+        title="Trilhas"
+        description="Acompanhe suas trilhas de estudo e seus tópicos."
+        action={
+          <button
+            className="btn btn-primary"
+            type="button"
+            onClick={handleCreateClick}
+          >
+            {isFormVisible && !editingTrackId ? 'Fechar' : 'Nova trilha'}
+          </button>
+        }
+      />
 
       {errorMessage && (
         <div className="alert alert-danger" role="alert">
@@ -307,7 +307,7 @@ async function handleConfirmDelete() {
                       >
                         {track.title}
                       </Link>
-                      
+
                       {track.description && (
                         <div className="text-muted small">
                           {track.description}
@@ -320,9 +320,7 @@ async function handleConfirmDelete() {
                     <td>{track.topics.length}</td>
 
                     <td>
-                      {new Intl.DateTimeFormat('pt-BR').format(
-                        new Date(track.created_at),
-                      )}
+                      {formatDate(track.created_at)}
                     </td>
 
                     <td className="text-end">
@@ -356,59 +354,15 @@ async function handleConfirmDelete() {
         </div>
       )}
         {trackToDelete && (
-          <>
-            <div className="modal fade show d-block" tabIndex={-1} role="dialog">
-              <div className="modal-dialog modal-dialog-centered" role="document">
-                <div className="modal-content border-0 shadow">
-                  <div className="modal-header">
-                    <h5 className="modal-title">Excluir trilha</h5>
-                    <button
-                      className="btn-close"
-                      type="button"
-                      aria-label="Fechar"
-                      disabled={deletingTrackId === trackToDelete.id}
-                      onClick={() => setTrackToDelete(null)}
-                    />
-                  </div>
-
-                  <div className="modal-body">
-                    <p className="mb-1">
-                      Tem certeza que deseja excluir a trilha{' '}
-                      <strong>{trackToDelete.title}</strong>?
-                    </p>
-
-                    <p className="text-muted mb-0">
-                      Essa ação também removerá os tópicos vinculados a ela.
-                    </p>
-                  </div>
-
-                  <div className="modal-footer">
-                    <button
-                      className="btn btn-outline-secondary"
-                      type="button"
-                      disabled={deletingTrackId === trackToDelete.id}
-                      onClick={() => setTrackToDelete(null)}
-                    >
-                      Cancelar
-                    </button>
-
-                    <button
-                      className="btn btn-danger"
-                      type="button"
-                      disabled={deletingTrackId === trackToDelete.id}
-                      onClick={handleConfirmDelete}
-                    >
-                      {deletingTrackId === trackToDelete.id
-                        ? 'Excluindo...'
-                        : 'Excluir trilha'}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="modal-backdrop fade show" />
-          </>
+          <ConfirmModal
+            title="Excluir trilha"
+            message={`Tem certeza que deseja excluir a trilha "${trackToDelete.title}"?`}
+            description="Essa ação também removerá os tópicos vinculados a ela."
+            confirmLabel="Excluir trilha"
+            isLoading={deletingTrackId === trackToDelete.id}
+            onCancel={() => setTrackToDelete(null)}
+            onConfirm={handleConfirmDelete}
+          />
         )}
     </div>
   );
