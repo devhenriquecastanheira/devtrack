@@ -1,26 +1,27 @@
 from rest_framework import serializers
 
-from topics.serializers import TopicSerializer
-from .models import Track
+from .models import Topic
 
 
-class TrackSerializer(serializers.ModelSerializer):
-    topics = TopicSerializer(many=True, read_only=True)
+class TopicSerializer(serializers.ModelSerializer):
+    track_title = serializers.CharField(source='track.title', read_only=True)
 
     class Meta:
-        model = Track
+        model = Topic
         fields = [
             'id',
+            'track',
+            'track_title',
             'title',
             'description',
-            'status',
-            'topics',
+            'completed',
+            'order',
             'created_at',
             'updated_at',
         ]
         read_only_fields = [
             'id',
-            'topics',
+            'track_title',
             'created_at',
             'updated_at',
         ]
