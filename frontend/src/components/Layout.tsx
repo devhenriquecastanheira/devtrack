@@ -1,29 +1,46 @@
-import { Link, Outlet } from 'react-router';
+import { NavLink, Outlet } from 'react-router';
 
 export function Layout() {
   return (
     <div>
-      <nav className="navbar navbar-expand-lg bg-dark navbar-dark">
+      <nav className="navbar navbar-expand-lg bg-dark navbar-dark shadow-sm">
         <div className="container">
-          <Link className="navbar-brand fw-bold" to="/">
+          <NavLink className="navbar-brand fw-bold" to="/">
             DevTrack
-          </Link>
+          </NavLink>
 
-          <div className="navbar-nav">
-            <Link className="nav-link" to="/">
+          <div className="navbar-nav flex-row gap-2 gap-md-3">
+            <NavLink
+              className={({ isActive }) =>
+                `nav-link ${isActive ? 'active fw-semibold' : ''}`
+              }
+              to="/"
+            >
               Dashboard
-            </Link>
-            <Link className="nav-link" to="/tracks">
+            </NavLink>
+
+            <NavLink
+              className={({ isActive }) =>
+                `nav-link ${isActive ? 'active fw-semibold' : ''}`
+              }
+              to="/tracks"
+            >
               Trilhas
-            </Link>
-            <Link className="nav-link" to="/projects">
+            </NavLink>
+
+            <NavLink
+              className={({ isActive }) =>
+                `nav-link ${isActive ? 'active fw-semibold' : ''}`
+              }
+              to="/projects"
+            >
               Projetos
-            </Link>
+            </NavLink>
           </div>
         </div>
       </nav>
 
-      <main className="container py-4">
+      <main className="container page-container">
         <Outlet />
       </main>
     </div>

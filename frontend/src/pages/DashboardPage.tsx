@@ -101,8 +101,8 @@ export function DashboardPage() {
         <div className="col-md-3">
           <div className="card shadow-sm h-100">
             <div className="card-body">
-              <p className="text-muted mb-1">Trilhas</p>
-              <h2 className="display-6 mb-0">{summary.tracks_count}</h2>
+              <p className="stat-card-label">Trilhas</p>
+              <p className="stat-card-value">{summary.tracks_count}</p>
             </div>
           </div>
         </div>
@@ -110,8 +110,8 @@ export function DashboardPage() {
         <div className="col-md-3">
           <div className="card shadow-sm h-100">
             <div className="card-body">
-              <p className="text-muted mb-1">Tópicos</p>
-              <h2 className="display-6 mb-0">{summary.topics_count}</h2>
+              <p className="stat-card-label">Tópicos</p>
+              <p className="stat-card-value">{summary.topics_count}</p>
             </div>
           </div>
         </div>
@@ -119,10 +119,10 @@ export function DashboardPage() {
         <div className="col-md-3">
           <div className="card shadow-sm h-100">
             <div className="card-body">
-              <p className="text-muted mb-1">Tópicos concluídos</p>
-              <h2 className="display-6 mb-0">
+              <p className="stat-card-label">Tópicos concluídos</p>
+              <p className="stat-card-value">
                 {summary.completed_topics_count}
-              </h2>
+              </p>
             </div>
           </div>
         </div>

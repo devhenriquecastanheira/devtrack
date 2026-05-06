@@ -442,7 +442,7 @@ export function ProjectsPage() {
                       </span>
                     </div>
 
-                    <div className="d-flex gap-2">
+                    <div className="d-flex flex-wrap gap-2">
                       <button
                         className="btn btn-sm btn-outline-primary"
                         type="button"

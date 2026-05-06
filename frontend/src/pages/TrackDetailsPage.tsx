@@ -477,7 +477,7 @@ export function TrackDetailsPage() {
           <div className="list-group list-group-flush">
             {track.topics.map((topic) => (
               <div
-                className="list-group-item d-flex justify-content-between align-items-start gap-3"
+                className="list-group-item d-flex flex-column flex-md-row justify-content-between align-items-start gap-3"
                 key={topic.id}
               >
                 <div>
@@ -505,7 +505,7 @@ export function TrackDetailsPage() {
                   )}
                 </div>
 
-                <div className="d-flex align-items-center gap-2">
+                <div className="d-flex flex-wrap justify-content-end align-items-center gap-2">
                   <span className="badge text-bg-light">
                     Ordem {topic.order}
                   </span>

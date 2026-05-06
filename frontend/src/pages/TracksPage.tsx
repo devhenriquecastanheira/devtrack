@@ -408,7 +408,7 @@ async function handleConfirmDelete() {
                     </td>
 
                     <td className="text-end">
-                      <div className="d-flex justify-content-end gap-2">
+                      <div className="table-actions d-flex justify-content-end gap-2">
                         <button
                           className="btn btn-sm btn-outline-primary"
                           type="button"
