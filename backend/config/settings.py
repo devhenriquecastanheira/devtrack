@@ -21,12 +21,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config('SECRET_KEY')
+SECRET_KEY = config('DJANGO_SECRET_KEY', default=config('SECRET_KEY', default='dev-secret-key'))
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config('DEBUG', default=False, cast=bool)
+DEBUG = config('DJANGO_DEBUG', default=config('DEBUG', default=False), cast=bool)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = config(
+    'DJANGO_ALLOWED_HOSTS',
+    default='localhost,127.0.0.1',
+).split(',')
 
 
 # Application definition
@@ -87,11 +90,11 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('DB_NAME'),
-        'USER': config('DB_USER'),
-        'PASSWORD': config('DB_PASSWORD'),
-        'HOST': config('DB_HOST'),
-        'PORT': config('DB_PORT', cast=int),
+        'NAME': config('DJANGO_DB_NAME', default=config('DB_NAME', default='devtrack_db')),
+        'USER': config('DJANGO_DB_USER', default=config('DB_USER', default='devtrack_user')),
+        'PASSWORD': config('DJANGO_DB_PASSWORD', default=config('DB_PASSWORD', default='devtrack_password')),
+        'HOST': config('DJANGO_DB_HOST', default=config('DB_HOST', default='localhost')),
+        'PORT': config('DJANGO_DB_PORT', default=config('DB_PORT', default=5432), cast=int),
     }
 }
 

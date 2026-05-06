@@ -76,6 +76,36 @@ Acesse:
 http://localhost:8000
 ```
 
+## Como rodar com Docker
+
+Crie um arquivo `.env` na raiz do projeto com base no `.env.example`.
+
+Depois rode:
+
+```bash
+docker compose up --build
+```
+
+Em outro terminal, aplique as migrations:
+
+```bash
+docker compose exec backend python manage.py migrate
+```
+
+Para criar um superusuário:
+
+```bash
+docker compose exec backend python manage.py createsuperuser
+```
+
+Acesse:
+
+```txt
+Frontend: http://localhost:5173
+Backend: http://localhost:8000
+Admin: http://localhost:8000/admin
+```
+
 ## Status
 
 Em desenvolvimento.
