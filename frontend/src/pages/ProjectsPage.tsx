@@ -47,10 +47,20 @@ export function ProjectsPage() {
   const [formData, setFormData] = useState<ProjectFormData>(initialFormData);
   const [isFormVisible, setIsFormVisible] = useState(false);
 
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [ordering, setOrdering] = useState('-created_at');
+
   async function loadProjects() {
     try {
       setErrorMessage('');
-      const data = await getProjects();
+
+      const data = await getProjects({
+        search: search.trim() || undefined,
+        status: statusFilter || undefined,
+        ordering,
+      });
+
       setProjects(data);
     } catch (error) {
       console.error('Erro ao carregar projetos:', error);
@@ -62,7 +72,7 @@ export function ProjectsPage() {
 
   useEffect(() => {
     loadProjects();
-  }, []);
+  }, [search, statusFilter, ordering]);
 
   function resetForm() {
     setFormData(initialFormData);
@@ -75,6 +85,12 @@ export function ProjectsPage() {
     setEditingProjectId(null);
     setFormData(initialFormData);
     setIsFormVisible((currentValue) => !currentValue);
+  }
+
+  function handleClearFilters() {
+    setSearch('');
+    setStatusFilter('');
+    setOrdering('-created_at');
   }
 
   function handleEditClick(project: Project) {
@@ -200,6 +216,72 @@ export function ProjectsPage() {
           </button>
         }
       />
+
+      <div className="card shadow-sm mb-4">
+        <div className="card-body">
+          <div className="row g-3 align-items-end">
+            <div className="col-md-5">
+              <label className="form-label" htmlFor="project-search">
+                Buscar
+              </label>
+              <input
+                className="form-control"
+                id="project-search"
+                type="text"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="Buscar por título, descrição ou tecnologia"
+              />
+            </div>
+
+            <div className="col-md-3">
+              <label className="form-label" htmlFor="project-status-filter">
+                Status
+              </label>
+              <select
+                className="form-select"
+                id="project-status-filter"
+                value={statusFilter}
+                onChange={(event) => setStatusFilter(event.target.value)}
+              >
+                <option value="">Todos</option>
+                <option value="planning">Planejamento</option>
+                <option value="in_progress">Em desenvolvimento</option>
+                <option value="paused">Pausado</option>
+                <option value="completed">Concluído</option>
+              </select>
+            </div>
+
+            <div className="col-md-3">
+              <label className="form-label" htmlFor="project-ordering">
+                Ordenar por
+              </label>
+              <select
+                className="form-select"
+                id="project-ordering"
+                value={ordering}
+                onChange={(event) => setOrdering(event.target.value)}
+              >
+                <option value="-created_at">Mais recentes</option>
+                <option value="created_at">Mais antigos</option>
+                <option value="title">Título A-Z</option>
+                <option value="-title">Título Z-A</option>
+                <option value="status">Status A-Z</option>
+              </select>
+            </div>
+
+            <div className="col-md-1 d-grid">
+              <button
+                className="btn btn-outline-secondary"
+                type="button"
+                onClick={handleClearFilters}
+              >
+                Limpar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {errorMessage && (
         <div className="alert alert-danger" role="alert">
@@ -339,7 +421,7 @@ export function ProjectsPage() {
 
       {!errorMessage && projects.length === 0 && (
         <div className="alert alert-info" role="alert">
-          Nenhum projeto cadastrado ainda.
+          Nenhum projeto encontrado com os filtros atuais.
         </div>
       )}
 

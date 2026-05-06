@@ -10,8 +10,17 @@ export type SaveProjectRequest = {
   status: ProjectStatus;
 };
 
-export async function getProjects() {
-  const response = await api.get<Project[]>('/projects/');
+export type GetProjectsParams = {
+  search?: string;
+  status?: string;
+  ordering?: string;
+};
+
+export async function getProjects(params?: GetProjectsParams) {
+  const response = await api.get<Project[]>('/projects/', {
+    params,
+  });
+
   return response.data;
 }
 
