@@ -6,4 +6,5 @@ urlpatterns = [
     path('api/', include('tracks.urls')),
     path('api/', include('topics.urls')),
     path('api/', include('projects.urls')),
+    path('api/dashboard/', include('dashboard.urls')),
 ]
