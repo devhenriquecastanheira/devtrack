@@ -1,6 +1,11 @@
 import type { ChangeEvent, FormEvent } from 'react';
 import { useEffect, useState } from 'react';
-import { createTrack, getTracks } from '../api/tracks';
+import {
+  createTrack,
+  deleteTrack,
+  getTracks,
+  updateTrack,
+} from '../api/tracks';
 import type { Track, TrackStatus } from '../types/track';
 
 const statusLabels: Record<TrackStatus, string> = {
@@ -25,6 +30,9 @@ export function TracksPage() {
   const [tracks, setTracks] = useState<Track[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [deletingTrackId, setDeletingTrackId] = useState<number | null>(null);
+  const [trackToDelete, setTrackToDelete] = useState<Track | null>(null);
+  const [editingTrackId, setEditingTrackId] = useState<number | null>(null);
   const [errorMessage, setErrorMessage] = useState('');
   const [formData, setFormData] = useState<TrackFormData>(initialFormData);
   const [isFormVisible, setIsFormVisible] = useState(false);
@@ -46,9 +54,33 @@ export function TracksPage() {
     loadTracks();
   }, []);
 
+  function resetForm() {
+    setFormData(initialFormData);
+    setEditingTrackId(null);
+    setIsFormVisible(false);
+  }
+
+  function handleCreateClick() {
+    setErrorMessage('');
+    setEditingTrackId(null);
+    setFormData(initialFormData);
+    setIsFormVisible((currentValue) => !currentValue);
+  }
+
+  function handleEditClick(track: Track) {
+    setErrorMessage('');
+    setEditingTrackId(track.id);
+    setFormData({
+      title: track.title,
+      description: track.description,
+      status: track.status,
+    });
+    setIsFormVisible(true);
+  }
+
   function handleChange(
-  event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
-) {
+    event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
+  ) {
     const { name, value } = event.target;
 
     setFormData((currentFormData) => ({
@@ -69,22 +101,69 @@ export function TracksPage() {
       setIsSaving(true);
       setErrorMessage('');
 
-      const createdTrack = await createTrack({
+      const payload = {
         title: formData.title.trim(),
         description: formData.description.trim(),
         status: formData.status,
-      });
+      };
 
-      setTracks((currentTracks) => [createdTrack, ...currentTracks]);
-      setFormData(initialFormData);
-      setIsFormVisible(false);
+      if (editingTrackId) {
+        const updatedTrack = await updateTrack(editingTrackId, payload);
+
+        setTracks((currentTracks) =>
+          currentTracks.map((track) =>
+            track.id === updatedTrack.id ? updatedTrack : track,
+          ),
+        );
+      } else {
+        const createdTrack = await createTrack(payload);
+
+        setTracks((currentTracks) => [createdTrack, ...currentTracks]);
+      }
+
+      resetForm();
     } catch (error) {
-      console.error('Erro ao criar trilha:', error);
-      setErrorMessage('Não foi possível criar a trilha.');
+      console.error('Erro ao salvar trilha:', error);
+      setErrorMessage('Não foi possível salvar a trilha.');
     } finally {
       setIsSaving(false);
     }
   }
+
+  function handleDeleteClick(track: Track) {
+  setErrorMessage('');
+  setTrackToDelete(track);
+}
+
+async function handleConfirmDelete() {
+  if (!trackToDelete) {
+    return;
+  }
+
+  try {
+    setDeletingTrackId(trackToDelete.id);
+    setErrorMessage('');
+
+    await deleteTrack(trackToDelete.id);
+
+    setTracks((currentTracks) =>
+      currentTracks.filter(
+        (currentTrack) => currentTrack.id !== trackToDelete.id,
+      ),
+    );
+
+    if (editingTrackId === trackToDelete.id) {
+      resetForm();
+    }
+
+    setTrackToDelete(null);
+  } catch (error) {
+    console.error('Erro ao excluir trilha:', error);
+    setErrorMessage('Não foi possível excluir a trilha.');
+  } finally {
+    setDeletingTrackId(null);
+  }
+}
 
   if (isLoading) {
     return <p>Carregando trilhas...</p>;
@@ -103,9 +182,9 @@ export function TracksPage() {
         <button
           className="btn btn-primary"
           type="button"
-          onClick={() => setIsFormVisible((currentValue) => !currentValue)}
+          onClick={handleCreateClick}
         >
-          {isFormVisible ? 'Fechar' : 'Nova trilha'}
+          {isFormVisible && !editingTrackId ? 'Fechar' : 'Nova trilha'}
         </button>
       </div>
 
@@ -118,7 +197,9 @@ export function TracksPage() {
       {isFormVisible && (
         <div className="card shadow-sm mb-4">
           <div className="card-body">
-            <h5 className="card-title mb-3">Nova trilha</h5>
+            <h5 className="card-title mb-3">
+              {editingTrackId ? 'Editar trilha' : 'Nova trilha'}
+            </h5>
 
             <form onSubmit={handleSubmit}>
               <div className="mb-3">
@@ -174,17 +255,18 @@ export function TracksPage() {
                   type="submit"
                   disabled={isSaving}
                 >
-                  {isSaving ? 'Salvando...' : 'Salvar trilha'}
+                  {isSaving
+                    ? 'Salvando...'
+                    : editingTrackId
+                      ? 'Salvar alterações'
+                      : 'Salvar trilha'}
                 </button>
 
                 <button
                   className="btn btn-outline-secondary"
                   type="button"
                   disabled={isSaving}
-                  onClick={() => {
-                    setFormData(initialFormData);
-                    setIsFormVisible(false);
-                  }}
+                  onClick={resetForm}
                 >
                   Cancelar
                 </button>
@@ -210,6 +292,7 @@ export function TracksPage() {
                   <th>Status</th>
                   <th>Tópicos</th>
                   <th>Criada em</th>
+                  <th className="text-end">Ações</th>
                 </tr>
               </thead>
 
@@ -234,6 +317,30 @@ export function TracksPage() {
                         new Date(track.created_at),
                       )}
                     </td>
+
+                    <td className="text-end">
+                      <div className="d-flex justify-content-end gap-2">
+                        <button
+                          className="btn btn-sm btn-outline-primary"
+                          type="button"
+                          onClick={() => handleEditClick(track)}
+                          disabled={isSaving || deletingTrackId === track.id}
+                        >
+                          Editar
+                        </button>
+
+                        <button
+                          className="btn btn-sm btn-outline-danger"
+                          type="button"
+                          onClick={() => handleDeleteClick(track)}
+                          disabled={isSaving || deletingTrackId === track.id}
+                        >
+                          {deletingTrackId === track.id
+                            ? 'Excluindo...'
+                            : 'Excluir'}
+                        </button>
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -241,6 +348,61 @@ export function TracksPage() {
           </div>
         </div>
       )}
+        {trackToDelete && (
+          <>
+            <div className="modal fade show d-block" tabIndex={-1} role="dialog">
+              <div className="modal-dialog modal-dialog-centered" role="document">
+                <div className="modal-content border-0 shadow">
+                  <div className="modal-header">
+                    <h5 className="modal-title">Excluir trilha</h5>
+                    <button
+                      className="btn-close"
+                      type="button"
+                      aria-label="Fechar"
+                      disabled={deletingTrackId === trackToDelete.id}
+                      onClick={() => setTrackToDelete(null)}
+                    />
+                  </div>
+
+                  <div className="modal-body">
+                    <p className="mb-1">
+                      Tem certeza que deseja excluir a trilha{' '}
+                      <strong>{trackToDelete.title}</strong>?
+                    </p>
+
+                    <p className="text-muted mb-0">
+                      Essa ação também removerá os tópicos vinculados a ela.
+                    </p>
+                  </div>
+
+                  <div className="modal-footer">
+                    <button
+                      className="btn btn-outline-secondary"
+                      type="button"
+                      disabled={deletingTrackId === trackToDelete.id}
+                      onClick={() => setTrackToDelete(null)}
+                    >
+                      Cancelar
+                    </button>
+
+                    <button
+                      className="btn btn-danger"
+                      type="button"
+                      disabled={deletingTrackId === trackToDelete.id}
+                      onClick={handleConfirmDelete}
+                    >
+                      {deletingTrackId === trackToDelete.id
+                        ? 'Excluindo...'
+                        : 'Excluir trilha'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="modal-backdrop fade show" />
+          </>
+        )}
     </div>
   );
 }
