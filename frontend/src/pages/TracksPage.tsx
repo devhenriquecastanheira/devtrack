@@ -41,10 +41,20 @@ export function TracksPage() {
   const [formData, setFormData] = useState<TrackFormData>(initialFormData);
   const [isFormVisible, setIsFormVisible] = useState(false);
 
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [ordering, setOrdering] = useState('-created_at');
+
   async function loadTracks() {
     try {
       setErrorMessage('');
-      const data = await getTracks();
+
+      const data = await getTracks({
+        search: search.trim() || undefined,
+        status: statusFilter || undefined,
+        ordering,
+      });
+
       setTracks(data);
     } catch (error) {
       console.error('Erro ao carregar trilhas:', error);
@@ -56,7 +66,7 @@ export function TracksPage() {
 
   useEffect(() => {
     loadTracks();
-  }, []);
+  }, [search, statusFilter, ordering]);
 
   function resetForm() {
     setFormData(initialFormData);
@@ -69,6 +79,12 @@ export function TracksPage() {
     setEditingTrackId(null);
     setFormData(initialFormData);
     setIsFormVisible((currentValue) => !currentValue);
+  }
+
+  function handleClearFilters() {
+    setSearch('');
+    setStatusFilter('');
+    setOrdering('-created_at');
   }
 
   function handleEditClick(track: Track) {
@@ -189,6 +205,71 @@ async function handleConfirmDelete() {
         }
       />
 
+      <div className="card shadow-sm mb-4">
+        <div className="card-body">
+          <div className="row g-3 align-items-end">
+            <div className="col-md-5">
+              <label className="form-label" htmlFor="search">
+                Buscar
+              </label>
+              <input
+                className="form-control"
+                id="search"
+                type="text"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="Buscar por título ou descrição"
+              />
+            </div>
+
+            <div className="col-md-3">
+              <label className="form-label" htmlFor="status-filter">
+                Status
+              </label>
+              <select
+                className="form-select"
+                id="status-filter"
+                value={statusFilter}
+                onChange={(event) => setStatusFilter(event.target.value)}
+              >
+                <option value="">Todos</option>
+                <option value="not_started">Não iniciada</option>
+                <option value="in_progress">Em andamento</option>
+                <option value="completed">Concluída</option>
+              </select>
+            </div>
+
+            <div className="col-md-3">
+              <label className="form-label" htmlFor="ordering">
+                Ordenar por
+              </label>
+              <select
+                className="form-select"
+                id="ordering"
+                value={ordering}
+                onChange={(event) => setOrdering(event.target.value)}
+              >
+                <option value="-created_at">Mais recentes</option>
+                <option value="created_at">Mais antigas</option>
+                <option value="title">Título A-Z</option>
+                <option value="-title">Título Z-A</option>
+                <option value="status">Status A-Z</option>
+              </select>
+            </div>
+
+            <div className="col-md-1 d-grid">
+              <button
+                className="btn btn-outline-secondary"
+                type="button"
+                onClick={handleClearFilters}
+              >
+                Limpar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {errorMessage && (
         <div className="alert alert-danger" role="alert">
           {errorMessage}
@@ -279,7 +360,7 @@ async function handleConfirmDelete() {
 
       {!errorMessage && tracks.length === 0 && (
         <div className="alert alert-info" role="alert">
-          Nenhuma trilha cadastrada ainda.
+          Nenhuma trilha encontrada com os filtros atuais.
         </div>
       )}
 

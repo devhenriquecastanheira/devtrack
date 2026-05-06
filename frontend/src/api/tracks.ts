@@ -7,8 +7,17 @@ export type SaveTrackRequest = {
   status: TrackStatus;
 };
 
-export async function getTracks() {
-  const response = await api.get<Track[]>('/tracks/');
+export type GetTracksParams = {
+  search?: string;
+  status?: string;
+  ordering?: string;
+};
+
+export async function getTracks(params?: GetTracksParams) {
+  const response = await api.get<Track[]>('/tracks/', {
+    params,
+  });
+
   return response.data;
 }
 
