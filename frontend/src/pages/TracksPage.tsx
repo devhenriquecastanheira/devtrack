@@ -1,5 +1,6 @@
 import type { ChangeEvent, FormEvent } from 'react';
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router';
 import {
   createTrack,
   deleteTrack,
@@ -300,7 +301,13 @@ async function handleConfirmDelete() {
                 {tracks.map((track) => (
                   <tr key={track.id}>
                     <td>
-                      <strong>{track.title}</strong>
+                      <Link
+                        className="fw-bold text-decoration-none"
+                        to={`/tracks/${track.id}`}
+                      >
+                        {track.title}
+                      </Link>
+                      
                       {track.description && (
                         <div className="text-muted small">
                           {track.description}

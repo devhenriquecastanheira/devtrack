@@ -12,6 +12,11 @@ export async function getTracks() {
   return response.data;
 }
 
+export async function getTrackById(id: number) {
+  const response = await api.get<Track>(`/tracks/${id}/`);
+  return response.data;
+}
+
 export async function createTrack(data: SaveTrackRequest) {
   const response = await api.post<Track>('/tracks/', data);
   return response.data;
