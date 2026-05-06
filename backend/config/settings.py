@@ -44,6 +44,7 @@ INSTALLED_APPS = [
 
     'tracks',
     'topics',
+    'projects',
 ]
 
 MIDDLEWARE = [
