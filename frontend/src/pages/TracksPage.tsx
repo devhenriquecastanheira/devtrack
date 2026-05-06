@@ -11,6 +11,7 @@ import type { Track, TrackStatus } from '../types/track';
 import { ConfirmModal } from '../components/ConfirmModal';
 import { PageHeader } from '../components/PageHeader';
 import { formatDate } from '../utils/formatDate';
+import { useDebounce } from '../hooks/useDebounce';
 
 const statusLabels: Record<TrackStatus, string> = {
   not_started: 'Não iniciada',
@@ -45,12 +46,14 @@ export function TracksPage() {
   const [statusFilter, setStatusFilter] = useState('');
   const [ordering, setOrdering] = useState('-created_at');
 
+  const debouncedSearch = useDebounce(search);
+
   async function loadTracks() {
     try {
       setErrorMessage('');
 
       const data = await getTracks({
-        search: search.trim() || undefined,
+        search: debouncedSearch.trim() || undefined,
         status: statusFilter || undefined,
         ordering,
       });
@@ -66,7 +69,7 @@ export function TracksPage() {
 
   useEffect(() => {
     loadTracks();
-  }, [search, statusFilter, ordering]);
+  }, [debouncedSearch, statusFilter, ordering]);
 
   function resetForm() {
     setFormData(initialFormData);
