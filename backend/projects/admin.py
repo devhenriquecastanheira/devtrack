@@ -8,6 +8,7 @@ class ProjectAdmin(admin.ModelAdmin):
     list_display = (
         'id',
         'title',
+        'owner',
         'status',
         'technologies',
         'repository_url',
@@ -15,6 +16,6 @@ class ProjectAdmin(admin.ModelAdmin):
         'created_at',
         'updated_at',
     )
-    list_filter = ('status', 'created_at')
-    search_fields = ('title', 'description', 'technologies')
+    list_filter = ('status', 'owner', 'created_at')
+    search_fields = ('title', 'description', 'technologies', 'owner__username')
     ordering = ('-created_at',)

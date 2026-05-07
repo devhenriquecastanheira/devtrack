@@ -204,6 +204,8 @@ export function ProjectsPage() {
     return <p>Carregando projetos...</p>;
   }
 
+  const hasActiveFilters = !!search || !!statusFilter || ordering !== '-created_at';
+
   return (
     <div>
       <PageHeader
@@ -424,7 +426,9 @@ export function ProjectsPage() {
 
       {!errorMessage && projects.length === 0 && (
         <div className="alert alert-info" role="alert">
-          Nenhum projeto encontrado com os filtros atuais.
+          {hasActiveFilters
+            ? 'Nenhum projeto encontrado com os filtros atuais.'
+            : 'Nenhum projeto cadastrado ainda. Adicione um projeto para acompanhar seu portfólio.'}
         </div>
       )}
 

@@ -75,6 +75,11 @@ export function DashboardPage() {
 
   const latestTracks = tracks.slice(0, 3);
 
+  const hasNoData =
+    summary.tracks_count === 0 &&
+    summary.topics_count === 0 &&
+    summary.projects_count === 0;
+
   const inProgressProjects = projects
     .filter((project) => project.status === 'in_progress')
     .slice(0, 3);
@@ -96,6 +101,28 @@ export function DashboardPage() {
           </div>
         }
       />
+
+      {hasNoData && (
+        <div className="alert alert-primary shadow-sm" role="alert">
+          <h2 className="h5">Bem-vindo ao DevTrack!</h2>
+
+          <p className="mb-3">
+            Você ainda não possui trilhas, tópicos ou projetos cadastrados.
+            Comece criando sua primeira trilha de estudo ou adicionando um projeto
+            ao seu portfólio.
+          </p>
+
+          <div className="d-flex flex-wrap gap-2">
+            <Link className="btn btn-primary" to="/tracks">
+              Criar primeira trilha
+            </Link>
+
+            <Link className="btn btn-outline-primary" to="/projects">
+              Adicionar projeto
+            </Link>
+          </div>
+        </div>
+      )}
 
       <div className="row g-3 mb-4">
         <div className="col-md-3">

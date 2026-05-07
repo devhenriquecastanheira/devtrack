@@ -192,6 +192,8 @@ async function handleConfirmDelete() {
     return <p>Carregando trilhas...</p>;
   }
 
+  const hasActiveFilters = !!search || !!statusFilter || ordering !== '-created_at';
+
   return (
     <div>
       <PageHeader
@@ -363,7 +365,9 @@ async function handleConfirmDelete() {
 
       {!errorMessage && tracks.length === 0 && (
         <div className="alert alert-info" role="alert">
-          Nenhuma trilha encontrada com os filtros atuais.
+          {hasActiveFilters
+            ? 'Nenhuma trilha encontrada com os filtros atuais.'
+            : 'Nenhuma trilha cadastrada ainda. Crie sua primeira trilha de estudo para começar.'}
         </div>
       )}
 
