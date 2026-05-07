@@ -61,15 +61,13 @@ export function ProjectsPage() {
 
   const debouncedSearch = useDebounce(search);
 
-  async function loadProjects() {
+  async function loadProjects(page = currentPage) {
     try {
       setErrorMessage('');
 
       const data = await getProjects({
-        search: debouncedSearch.trim() || undefined,
-        status: statusFilter || undefined,
-        ordering,
-        page: currentPage,
+        ...getProjectFilters(),
+        page,
       });
 
       setProjects(data.results);
@@ -86,13 +84,22 @@ export function ProjectsPage() {
     }
   }
 
-  useEffect(() => {
-    loadProjects();
-  }, [debouncedSearch, statusFilter, ordering, currentPage]);
+  function getProjectFilters() {
+    return {
+      search: debouncedSearch.trim() || undefined,
+      status: statusFilter || undefined,
+      ordering,
+    };
+  }
 
   useEffect(() => {
     setCurrentPage(1);
+    loadProjects(1);
   }, [debouncedSearch, statusFilter, ordering]);
+
+  useEffect(() => {
+    loadProjects(currentPage);
+  }, [currentPage]);
 
   function resetForm() {
     setFormData(initialFormData);
@@ -160,14 +167,15 @@ export function ProjectsPage() {
       };
 
       if (editingProjectId) {
-        await updateProject(editingProjectId, payload);
-      } else {
-        await createProject(payload);
-        setCurrentPage(1);
-      }
+      await updateProject(editingProjectId, payload);
+      await loadProjects(currentPage);
+    } else {
+      await createProject(payload);
+      setCurrentPage(1);
+      await loadProjects(1);
+    }
 
-      await loadProjects();
-      resetForm();
+    resetForm();
     } catch (error) {
       console.error('Erro ao salvar projeto:', error);
       setErrorMessage(
@@ -194,7 +202,14 @@ export function ProjectsPage() {
 
       await deleteProject(projectToDelete.id);
 
-      await loadProjects();
+      const shouldGoToPreviousPage = projects.length === 1 && currentPage > 1;
+      const nextPage = shouldGoToPreviousPage ? currentPage - 1 : currentPage;
+
+      if (shouldGoToPreviousPage) {
+        setCurrentPage(nextPage);
+      }
+
+      await loadProjects(nextPage);
 
       if (editingProjectId === projectToDelete.id) {
         resetForm();

@@ -55,15 +55,13 @@ export function TracksPage() {
 
   const debouncedSearch = useDebounce(search);
 
-  async function loadTracks() {
+  async function loadTracks(page = currentPage) {
     try {
       setErrorMessage('');
 
       const data = await getTracks({
-        search: debouncedSearch.trim() || undefined,
-        status: statusFilter || undefined,
-        ordering,
-        page: currentPage,
+        ...getTrackFilters(),
+        page,
       });
 
       setTracks(data.results);
@@ -80,13 +78,22 @@ export function TracksPage() {
     }
   }
 
-  useEffect(() => {
-    loadTracks();
-  }, [debouncedSearch, statusFilter, ordering, currentPage]);
+  function getTrackFilters() {
+    return {
+      search: debouncedSearch.trim() || undefined,
+      status: statusFilter || undefined,
+      ordering,
+    };
+  }
 
   useEffect(() => {
     setCurrentPage(1);
+    loadTracks(1);
   }, [debouncedSearch, statusFilter, ordering]);
+
+  useEffect(() => {
+    loadTracks(currentPage);
+  }, [currentPage]);
 
   function resetForm() {
     setFormData(initialFormData);
@@ -149,12 +156,13 @@ export function TracksPage() {
 
       if (editingTrackId) {
         await updateTrack(editingTrackId, payload);
+        await loadTracks(currentPage);
       } else {
         await createTrack(payload);
         setCurrentPage(1);
+        await loadTracks(1);
       }
 
-      await loadTracks();
       resetForm();
     } catch (error) {
       console.error('Erro ao salvar trilha:', error);
@@ -182,7 +190,14 @@ async function handleConfirmDelete() {
 
     await deleteTrack(trackToDelete.id);
 
-    await loadTracks();
+    const shouldGoToPreviousPage = tracks.length === 1 && currentPage > 1;
+    const nextPage = shouldGoToPreviousPage ? currentPage - 1 : currentPage;
+
+    if (shouldGoToPreviousPage) {
+      setCurrentPage(nextPage);
+    }
+
+    await loadTracks(nextPage);
 
     if (editingTrackId === trackToDelete.id) {
       resetForm();
