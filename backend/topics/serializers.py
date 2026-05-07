@@ -31,7 +31,7 @@ class TopicSerializer(serializers.ModelSerializer):
 
         if request and track.owner != request.user:
             raise serializers.ValidationError(
-                'Você não pode criar tópicos em uma trilha que não pertence a você.'
+                'A trilha informada não pertence ao usuário autenticado.'
             )
 
         return track
