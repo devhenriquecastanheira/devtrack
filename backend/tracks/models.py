@@ -11,9 +11,7 @@ class Track(models.Model):
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name='tracks',
-        null=True,
-        blank=True
+        related_name='tracks'
     )
     title = models.CharField(max_length=150)
     description = models.TextField(blank=True)
