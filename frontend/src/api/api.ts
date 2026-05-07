@@ -1,5 +1,9 @@
-import axios, { AxiosError } from 'axios';
-import type { InternalAxiosRequestConfig } from 'axios';
+import axios, { AxiosError, type InternalAxiosRequestConfig } from 'axios';
+import {
+  ACCESS_TOKEN_KEY,
+  AUTH_SESSION_EXPIRED_EVENT,
+  REFRESH_TOKEN_KEY,
+} from '../constants/auth';
 
 export const api = axios.create({
   baseURL: 'http://localhost:8000/api',
@@ -9,8 +13,17 @@ type RetryRequestConfig = InternalAxiosRequestConfig & {
   _retry?: boolean;
 };
 
+function clearAuthStorage() {
+  localStorage.removeItem(ACCESS_TOKEN_KEY);
+  localStorage.removeItem(REFRESH_TOKEN_KEY);
+}
+
+function notifySessionExpired() {
+  window.dispatchEvent(new Event(AUTH_SESSION_EXPIRED_EVENT));
+}
+
 api.interceptors.request.use((config) => {
-  const accessToken = localStorage.getItem('devtrack:accessToken');
+  const accessToken = localStorage.getItem(ACCESS_TOKEN_KEY);
 
   if (accessToken) {
     config.headers.Authorization = `Bearer ${accessToken}`;
@@ -32,11 +45,11 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    const refreshToken = localStorage.getItem('devtrack:refreshToken');
+    const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
 
     if (!refreshToken) {
-      localStorage.removeItem('devtrack:accessToken');
-      localStorage.removeItem('devtrack:refreshToken');
+      clearAuthStorage();
+      notifySessionExpired();
 
       return Promise.reject(error);
     }
@@ -53,14 +66,14 @@ api.interceptors.response.use(
 
       const newAccessToken = response.data.access;
 
-      localStorage.setItem('devtrack:accessToken', newAccessToken);
+      localStorage.setItem(ACCESS_TOKEN_KEY, newAccessToken);
 
       originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
 
       return api(originalRequest);
     } catch (refreshError) {
-      localStorage.removeItem('devtrack:accessToken');
-      localStorage.removeItem('devtrack:refreshToken');
+      clearAuthStorage();
+      notifySessionExpired();
 
       return Promise.reject(refreshError);
     }

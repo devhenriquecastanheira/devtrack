@@ -1,6 +1,11 @@
 import type { ReactNode } from 'react';
 import { createContext, useContext, useEffect, useState } from 'react';
 import { getCurrentUser, login as loginRequest } from '../api/auth';
+import {
+  ACCESS_TOKEN_KEY,
+  AUTH_SESSION_EXPIRED_EVENT,
+  REFRESH_TOKEN_KEY,
+} from '../constants/auth';
 import type { LoginRequest, User } from '../types/auth';
 
 type AuthContextData = {
@@ -22,13 +27,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [isLoading, setIsLoading] = useState(true);
 
   function clearSession() {
-    localStorage.removeItem('devtrack:accessToken');
-    localStorage.removeItem('devtrack:refreshToken');
+    localStorage.removeItem(ACCESS_TOKEN_KEY);
+    localStorage.removeItem(REFRESH_TOKEN_KEY);
     setUser(null);
   }
 
   async function loadCurrentUser() {
-    const accessToken = localStorage.getItem('devtrack:accessToken');
+    const accessToken = localStorage.getItem(ACCESS_TOKEN_KEY);
 
     if (!accessToken) {
       setIsLoading(false);
@@ -50,11 +55,26 @@ export function AuthProvider({ children }: AuthProviderProps) {
     loadCurrentUser();
   }, []);
 
+  useEffect(() => {
+    function handleSessionExpired() {
+      clearSession();
+    }
+
+    window.addEventListener(AUTH_SESSION_EXPIRED_EVENT, handleSessionExpired);
+
+    return () => {
+      window.removeEventListener(
+        AUTH_SESSION_EXPIRED_EVENT,
+        handleSessionExpired,
+      );
+    };
+  }, []);
+
   async function login(data: LoginRequest) {
     const tokens = await loginRequest(data);
 
-    localStorage.setItem('devtrack:accessToken', tokens.access);
-    localStorage.setItem('devtrack:refreshToken', tokens.refresh);
+    localStorage.setItem(ACCESS_TOKEN_KEY, tokens.access);
+    localStorage.setItem(REFRESH_TOKEN_KEY, tokens.refresh);
 
     const currentUser = await getCurrentUser();
 
