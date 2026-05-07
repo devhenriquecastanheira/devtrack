@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router';
 import { register } from '../api/auth';
 import { useAuth } from '../contexts/AuthContext';
+import { getApiErrorMessage } from '../utils/getApiErrorMessage';
 
 export function RegisterPage() {
   const navigate = useNavigate();
@@ -44,7 +45,9 @@ export function RegisterPage() {
       navigate('/login');
     } catch (error) {
       console.error('Erro ao criar conta:', error);
-      setErrorMessage('Não foi possível criar a conta.');
+      setErrorMessage(
+        getApiErrorMessage(error, 'Não foi possível criar a conta.'),
+      );
     } finally {
       setIsSubmitting(false);
     }

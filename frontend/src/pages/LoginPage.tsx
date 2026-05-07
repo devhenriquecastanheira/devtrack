@@ -2,6 +2,7 @@ import type { FormEvent } from 'react';
 import { useState } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router';
 import { useAuth } from '../contexts/AuthContext';
+import { getApiErrorMessage } from '../utils/getApiErrorMessage';
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -36,7 +37,9 @@ export function LoginPage() {
       navigate('/');
     } catch (error) {
       console.error('Erro ao fazer login:', error);
-      setErrorMessage('Usuário ou senha inválidos.');
+      setErrorMessage(
+        getApiErrorMessage(error, 'Usuário ou senha inválidos.'),
+      );
     } finally {
       setIsSubmitting(false);
     }

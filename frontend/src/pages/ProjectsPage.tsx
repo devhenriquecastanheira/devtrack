@@ -11,6 +11,7 @@ import { ConfirmModal } from '../components/ConfirmModal';
 import { PageHeader } from '../components/PageHeader';
 import { formatDate } from '../utils/formatDate';
 import { useDebounce } from '../hooks/useDebounce';
+import { getApiErrorMessage } from '../utils/getApiErrorMessage';
 
 const statusLabels: Record<ProjectStatus, string> = {
   planning: 'Planejamento',
@@ -67,7 +68,9 @@ export function ProjectsPage() {
       setProjects(data);
     } catch (error) {
       console.error('Erro ao carregar projetos:', error);
-      setErrorMessage('Não foi possível carregar os projetos.');
+      setErrorMessage(
+        getApiErrorMessage(error, 'Não foi possível carregar os projetos.'),
+      );
     } finally {
       setIsLoading(false);
     }
@@ -159,7 +162,9 @@ export function ProjectsPage() {
       resetForm();
     } catch (error) {
       console.error('Erro ao salvar projeto:', error);
-      setErrorMessage('Não foi possível salvar o projeto.');
+      setErrorMessage(
+        getApiErrorMessage(error, 'Não foi possível salvar o projeto.'),
+      );
     } finally {
       setIsSaving(false);
     }
@@ -194,7 +199,9 @@ export function ProjectsPage() {
       setProjectToDelete(null);
     } catch (error) {
       console.error('Erro ao excluir projeto:', error);
-      setErrorMessage('Não foi possível excluir o projeto.');
+      setErrorMessage(
+        getApiErrorMessage(error, 'Não foi possível excluir o projeto.'),
+      );
     } finally {
       setDeletingProjectId(null);
     }

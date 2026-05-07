@@ -9,6 +9,7 @@ import {
 } from '../api/topics';
 import type { Topic, Track, TrackStatus } from '../types/track';
 import { ConfirmModal } from '../components/ConfirmModal';
+import { getApiErrorMessage } from '../utils/getApiErrorMessage';
 
 const statusLabels: Record<TrackStatus, string> = {
   not_started: 'Não iniciada',
@@ -59,7 +60,9 @@ export function TrackDetailsPage() {
       setTrack(data);
     } catch (error) {
       console.error('Erro ao carregar trilha:', error);
-      setErrorMessage('Não foi possível carregar os detalhes da trilha.');
+      setErrorMessage(
+        getApiErrorMessage(error, 'Não foi possível carregar os detalhes da trilha.'),
+      );
     } finally {
       setIsLoading(false);
     }
@@ -179,7 +182,9 @@ export function TrackDetailsPage() {
       resetTopicForm();
     } catch (error) {
       console.error('Erro ao salvar tópico:', error);
-      setErrorMessage('Não foi possível salvar o tópico.');
+      setErrorMessage(
+        getApiErrorMessage(error, 'Não foi possível salvar o tópico.'),
+      );
     } finally {
       setIsSavingTopic(false);
     }
@@ -211,7 +216,9 @@ export function TrackDetailsPage() {
       });
     } catch (error) {
       console.error('Erro ao atualizar tópico:', error);
-      setErrorMessage('Não foi possível atualizar o tópico.');
+      setErrorMessage(
+        getApiErrorMessage(error, 'Não foi possível atualizar o tópico.'),
+      );
     }
   }
 
@@ -251,7 +258,9 @@ export function TrackDetailsPage() {
       setTopicToDelete(null);
     } catch (error) {
       console.error('Erro ao excluir tópico:', error);
-      setErrorMessage('Não foi possível excluir o tópico.');
+      setErrorMessage(
+        getApiErrorMessage(error, 'Não foi possível excluir o tópico.'),
+      );
     } finally {
       setDeletingTopicId(null);
     }

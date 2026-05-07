@@ -12,6 +12,7 @@ import { ConfirmModal } from '../components/ConfirmModal';
 import { PageHeader } from '../components/PageHeader';
 import { formatDate } from '../utils/formatDate';
 import { useDebounce } from '../hooks/useDebounce';
+import { getApiErrorMessage } from '../utils/getApiErrorMessage';
 
 const statusLabels: Record<TrackStatus, string> = {
   not_started: 'Não iniciada',
@@ -61,7 +62,9 @@ export function TracksPage() {
       setTracks(data);
     } catch (error) {
       console.error('Erro ao carregar trilhas:', error);
-      setErrorMessage('Não foi possível carregar as trilhas.');
+      setErrorMessage(
+        getApiErrorMessage(error, 'Não foi possível carregar as trilhas.'),
+      );
     } finally {
       setIsLoading(false);
     }
@@ -147,7 +150,9 @@ export function TracksPage() {
       resetForm();
     } catch (error) {
       console.error('Erro ao salvar trilha:', error);
-      setErrorMessage('Não foi possível salvar a trilha.');
+      setErrorMessage(
+        getApiErrorMessage(error, 'Não foi possível salvar a trilha.'),
+      );
     } finally {
       setIsSaving(false);
     }
@@ -182,7 +187,9 @@ async function handleConfirmDelete() {
     setTrackToDelete(null);
   } catch (error) {
     console.error('Erro ao excluir trilha:', error);
-    setErrorMessage('Não foi possível excluir a trilha.');
+    setErrorMessage(
+      getApiErrorMessage(error, 'Não foi possível excluir a trilha.'),
+    );
   } finally {
     setDeletingTrackId(null);
   }
