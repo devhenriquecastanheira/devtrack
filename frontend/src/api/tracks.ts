@@ -1,4 +1,5 @@
 import { api } from './api';
+import type { PaginatedResponse } from '../types/pagination';
 import type { Track, TrackStatus } from '../types/track';
 
 export type SaveTrackRequest = {
@@ -11,10 +12,11 @@ export type GetTracksParams = {
   search?: string;
   status?: string;
   ordering?: string;
+  page?: number;
 };
 
 export async function getTracks(params?: GetTracksParams) {
-  const response = await api.get<Track[]>('/tracks/', {
+  const response = await api.get<PaginatedResponse<Track>>('/tracks/', {
     params,
   });
 

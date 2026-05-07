@@ -1,4 +1,5 @@
 import { api } from './api';
+import type { PaginatedResponse } from '../types/pagination';
 import type { Project, ProjectStatus } from '../types/project';
 
 export type SaveProjectRequest = {
@@ -14,10 +15,11 @@ export type GetProjectsParams = {
   search?: string;
   status?: string;
   ordering?: string;
+  page?: number;
 };
 
 export async function getProjects(params?: GetProjectsParams) {
-  const response = await api.get<Project[]>('/projects/', {
+  const response = await api.get<PaginatedResponse<Project>>('/projects/', {
     params,
   });
 

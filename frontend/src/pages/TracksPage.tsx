@@ -13,6 +13,7 @@ import { PageHeader } from '../components/PageHeader';
 import { formatDate } from '../utils/formatDate';
 import { useDebounce } from '../hooks/useDebounce';
 import { getApiErrorMessage } from '../utils/getApiErrorMessage';
+import { PaginationControls } from '../components/PaginationControls';
 
 const statusLabels: Record<TrackStatus, string> = {
   not_started: 'Não iniciada',
@@ -47,6 +48,11 @@ export function TracksPage() {
   const [statusFilter, setStatusFilter] = useState('');
   const [ordering, setOrdering] = useState('-created_at');
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalTracks, setTotalTracks] = useState(0);
+  const [hasNextPage, setHasNextPage] = useState(false);
+  const [hasPreviousPage, setHasPreviousPage] = useState(false);
+
   const debouncedSearch = useDebounce(search);
 
   async function loadTracks() {
@@ -57,9 +63,13 @@ export function TracksPage() {
         search: debouncedSearch.trim() || undefined,
         status: statusFilter || undefined,
         ordering,
+        page: currentPage,
       });
 
-      setTracks(data);
+      setTracks(data.results);
+      setTotalTracks(data.count);
+      setHasNextPage(!!data.next);
+      setHasPreviousPage(!!data.previous);
     } catch (error) {
       console.error('Erro ao carregar trilhas:', error);
       setErrorMessage(
@@ -72,6 +82,10 @@ export function TracksPage() {
 
   useEffect(() => {
     loadTracks();
+  }, [debouncedSearch, statusFilter, ordering, currentPage]);
+
+  useEffect(() => {
+    setCurrentPage(1);
   }, [debouncedSearch, statusFilter, ordering]);
 
   function resetForm() {
@@ -134,19 +148,13 @@ export function TracksPage() {
       };
 
       if (editingTrackId) {
-        const updatedTrack = await updateTrack(editingTrackId, payload);
-
-        setTracks((currentTracks) =>
-          currentTracks.map((track) =>
-            track.id === updatedTrack.id ? updatedTrack : track,
-          ),
-        );
+        await updateTrack(editingTrackId, payload);
       } else {
-        const createdTrack = await createTrack(payload);
-
-        setTracks((currentTracks) => [createdTrack, ...currentTracks]);
+        await createTrack(payload);
+        setCurrentPage(1);
       }
 
+      await loadTracks();
       resetForm();
     } catch (error) {
       console.error('Erro ao salvar trilha:', error);
@@ -174,11 +182,7 @@ async function handleConfirmDelete() {
 
     await deleteTrack(trackToDelete.id);
 
-    setTracks((currentTracks) =>
-      currentTracks.filter(
-        (currentTrack) => currentTrack.id !== trackToDelete.id,
-      ),
-    );
+    await loadTracks();
 
     if (editingTrackId === trackToDelete.id) {
       resetForm();
@@ -446,6 +450,16 @@ async function handleConfirmDelete() {
               </tbody>
             </table>
           </div>
+
+          <PaginationControls
+            currentPage={currentPage}
+            totalItems={totalTracks}
+            pageSize={6}
+            hasNextPage={hasNextPage}
+            hasPreviousPage={hasPreviousPage}
+            onPageChange={setCurrentPage}
+          />
+
         </div>
       )}
         {trackToDelete && (

@@ -12,6 +12,7 @@ import { PageHeader } from '../components/PageHeader';
 import { formatDate } from '../utils/formatDate';
 import { useDebounce } from '../hooks/useDebounce';
 import { getApiErrorMessage } from '../utils/getApiErrorMessage';
+import { PaginationControls } from '../components/PaginationControls';
 
 const statusLabels: Record<ProjectStatus, string> = {
   planning: 'Planejamento',
@@ -53,6 +54,11 @@ export function ProjectsPage() {
   const [statusFilter, setStatusFilter] = useState('');
   const [ordering, setOrdering] = useState('-created_at');
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalProjects, setTotalProjects] = useState(0);
+  const [hasNextPage, setHasNextPage] = useState(false);
+  const [hasPreviousPage, setHasPreviousPage] = useState(false);
+
   const debouncedSearch = useDebounce(search);
 
   async function loadProjects() {
@@ -63,9 +69,13 @@ export function ProjectsPage() {
         search: debouncedSearch.trim() || undefined,
         status: statusFilter || undefined,
         ordering,
+        page: currentPage,
       });
 
-      setProjects(data);
+      setProjects(data.results);
+      setTotalProjects(data.count);
+      setHasNextPage(!!data.next);
+      setHasPreviousPage(!!data.previous);
     } catch (error) {
       console.error('Erro ao carregar projetos:', error);
       setErrorMessage(
@@ -78,6 +88,10 @@ export function ProjectsPage() {
 
   useEffect(() => {
     loadProjects();
+  }, [debouncedSearch, statusFilter, ordering, currentPage]);
+
+  useEffect(() => {
+    setCurrentPage(1);
   }, [debouncedSearch, statusFilter, ordering]);
 
   function resetForm() {
@@ -146,19 +160,13 @@ export function ProjectsPage() {
       };
 
       if (editingProjectId) {
-        const updatedProject = await updateProject(editingProjectId, payload);
-
-        setProjects((currentProjects) =>
-          currentProjects.map((project) =>
-            project.id === updatedProject.id ? updatedProject : project,
-          ),
-        );
+        await updateProject(editingProjectId, payload);
       } else {
-        const createdProject = await createProject(payload);
-
-        setProjects((currentProjects) => [createdProject, ...currentProjects]);
+        await createProject(payload);
+        setCurrentPage(1);
       }
 
+      await loadProjects();
       resetForm();
     } catch (error) {
       console.error('Erro ao salvar projeto:', error);
@@ -186,11 +194,7 @@ export function ProjectsPage() {
 
       await deleteProject(projectToDelete.id);
 
-      setProjects((currentProjects) =>
-        currentProjects.filter(
-          (currentProject) => currentProject.id !== projectToDelete.id,
-        ),
-      );
+      await loadProjects();
 
       if (editingProjectId === projectToDelete.id) {
         resetForm();
@@ -518,6 +522,15 @@ export function ProjectsPage() {
               </div>
             </div>
           ))}
+
+          <PaginationControls
+            currentPage={currentPage}
+            totalItems={totalProjects}
+            pageSize={6}
+            hasNextPage={hasNextPage}
+            hasPreviousPage={hasPreviousPage}
+            onPageChange={setCurrentPage}
+          />
         </div>
       )}
 

@@ -36,13 +36,13 @@ export function DashboardPage() {
 
         const [summaryData, tracksData, projectsData] = await Promise.all([
           getDashboardSummary(),
-          getTracks(),
-          getProjects(),
+          getTracks({ ordering: '-created_at', page: 1 }),
+          getProjects({ ordering: '-created_at', page: 1 }),
         ]);
 
         setSummary(summaryData);
-        setTracks(tracksData);
-        setProjects(projectsData);
+        setTracks(tracksData.results);
+        setProjects(projectsData.results);
       } catch (error) {
         console.error('Erro ao carregar dashboard:', error);
         setErrorMessage('Não foi possível carregar os dados do dashboard.');
