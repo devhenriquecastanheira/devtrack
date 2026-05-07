@@ -8,12 +8,16 @@ from tracks.models import Track
 
 @api_view(['GET'])
 def dashboard_summary(request):
-    tracks_count = Track.objects.count()
-    topics_count = Topic.objects.count()
-    completed_topics_count = Topic.objects.filter(completed=True).count()
-    pending_topics_count = Topic.objects.filter(completed=False).count()
-    projects_count = Project.objects.count()
-    in_progress_projects_count = Project.objects.filter(
+    tracks = Track.objects.filter(owner=request.user)
+    topics = Topic.objects.filter(track__owner=request.user)
+    projects = Project.objects.filter(owner=request.user)
+
+    tracks_count = tracks.count()
+    topics_count = topics.count()
+    completed_topics_count = topics.filter(completed=True).count()
+    pending_topics_count = topics.filter(completed=False).count()
+    projects_count = projects.count()
+    in_progress_projects_count = projects.filter(
         status='in_progress'
     ).count()
 

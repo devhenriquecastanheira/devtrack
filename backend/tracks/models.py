@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 
 class Track(models.Model):
@@ -7,6 +8,13 @@ class Track(models.Model):
         ('completed', 'Concluída'),
     ]
 
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='tracks',
+        null=True,
+        blank=True
+    )
     title = models.CharField(max_length=150)
     description = models.TextField(blank=True)
     status = models.CharField(

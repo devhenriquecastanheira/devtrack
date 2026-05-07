@@ -25,3 +25,13 @@ class TopicSerializer(serializers.ModelSerializer):
             'created_at',
             'updated_at',
         ]
+
+    def validate_track(self, track):
+        request = self.context.get('request')
+
+        if request and track.owner != request.user:
+            raise serializers.ValidationError(
+                'Você não pode criar tópicos em uma trilha que não pertence a você.'
+            )
+
+        return track

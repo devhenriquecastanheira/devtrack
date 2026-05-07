@@ -11,6 +11,7 @@ class TrackSerializer(serializers.ModelSerializer):
         model = Track
         fields = [
             'id',
+            'owner',
             'title',
             'description',
             'status',
@@ -20,6 +21,7 @@ class TrackSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = [
             'id',
+            'owner',
             'topics',
             'created_at',
             'updated_at',
