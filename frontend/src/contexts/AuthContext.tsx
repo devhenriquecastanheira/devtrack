@@ -21,6 +21,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  function clearSession() {
+    localStorage.removeItem('devtrack:accessToken');
+    localStorage.removeItem('devtrack:refreshToken');
+    setUser(null);
+  }
+
   async function loadCurrentUser() {
     const accessToken = localStorage.getItem('devtrack:accessToken');
 
@@ -34,9 +40,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setUser(currentUser);
     } catch (error) {
       console.error('Erro ao carregar usuário:', error);
-      localStorage.removeItem('devtrack:accessToken');
-      localStorage.removeItem('devtrack:refreshToken');
-      setUser(null);
+      clearSession();
     } finally {
       setIsLoading(false);
     }
@@ -58,9 +62,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }
 
   function logout() {
-    localStorage.removeItem('devtrack:accessToken');
-    localStorage.removeItem('devtrack:refreshToken');
-    setUser(null);
+    clearSession();
   }
 
   return (
